@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+type RootStackParamList = {
+  // ChapterContent: { filename: string; chapterNumber: number; title: string };
+  // AudioPlayer: { paragraph: string; filename: string; chapterNumber: number; paragraphIndex: number };
+  EpubDetail: { epub: {id: string, name: string} };
+};
 
 interface Epub {
   id: string;
@@ -9,7 +16,7 @@ interface Epub {
 
 const HomeScreen: React.FC = () => {
   const [epubs, setEpubs] = useState<Epub[]>([]);
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     fetch("http://localhost:8000/epubs")
