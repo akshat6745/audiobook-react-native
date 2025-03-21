@@ -27,11 +27,17 @@ interface Props {
   navigation: AudioPlayerScreenNavigationProp;
 }
 
+const defaultVoice = {
+  identifier: "com.apple.voice.compact.en-US.Samantha",
+  language: "en-US",
+  name: "Samantha",
+  quality: Speech.VoiceQuality.Default,
+};
+
 const AudioPlayerScreen: React.FC<Props> = ({ route }) => {
   const { paragraph } = route.params;
   const [isPlaying, setIsPlaying] = useState(false);
-  const [voice, setVoice] = useState<Speech.Voice | null>(null);
-  const [voiceName, setVoiceName] = useState<string>("Default");
+  const [voice, setVoice] = useState<Speech.Voice>(defaultVoice);
   const [speed, setSpeed] = useState("1.0");
   const [isVoicePickerVisible, setIsVoicePickerVisible] = useState(false);
   const [isSpeedPickerVisible, setIsSpeedPickerVisible] = useState(false);
@@ -50,11 +56,12 @@ const AudioPlayerScreen: React.FC<Props> = ({ route }) => {
   }, []);
 
   const changeVoices = (selectedVoiceId: string) => {
-    const selectedVoice = optionVoices.find((v) => v.identifier === selectedVoiceId);
-    setVoice(selectedVoice ?? null);
+    const selectedVoice = optionVoices.find(
+      (v) => v.identifier === selectedVoiceId
+    );
+    setVoice(selectedVoice ?? defaultVoice);
     setIsVoicePickerVisible(false);
   };
-
 
   const togglePlayPause = () => {
     if (isPlaying) {
