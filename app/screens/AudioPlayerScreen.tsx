@@ -6,6 +6,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { Picker } from "@react-native-picker/picker";
 import * as Speech from "expo-speech";
 import VoiceMenu from "./VoiceMenu";
+import GoogleTTS from "../utils/GoogleTTS";
 
 type RootStackParamList = {
   AudioPlayer: {
@@ -43,16 +44,19 @@ const AudioPlayerScreen: React.FC<Props> = ({ route }) => {
   const [isSpeedPickerVisible, setIsSpeedPickerVisible] = useState(false);
   const [optionVoices, setOptionVoices] = useState<Speech.Voice[]>([]);
 
+  const [gotResponse, setResponse] = useState(false);
+
   useEffect(() => {
-    Speech.getAvailableVoicesAsync().then((voices) => {
-      setOptionVoices(
-        voices.filter(
-          (voice) =>
-            voice.language.includes("en") &&
-            !voice.identifier.includes("synthesis")
-        )
-      );
-    });
+    // Speech.getAvailableVoicesAsync().then((voices) => {
+    //   setOptionVoices(
+    //     voices.filter(
+    //       (voice) =>
+    //         voice.language.includes("en") &&
+    //         !voice.identifier.includes("synthesis")
+    //     )
+    //   );
+    // });
+    // GoogleTTS.speak(paragraph);
   }, []);
 
   const changeVoices = (selectedVoiceId: string) => {
@@ -65,16 +69,24 @@ const AudioPlayerScreen: React.FC<Props> = ({ route }) => {
 
   const togglePlayPause = () => {
     if (isPlaying) {
-      Speech.stop();
+      Speech.pause();
+      // GoogleTTS.pause();
+    } else if(gotResponse) {
+      Speech.resume();
+      // GoogleTTS.resume();
     } else {
+      // GoogleTTS.speak(paragraph, voice.identifier, setResponse, parseFloat(speed));
       Speech.speak(paragraph, {
         voice: !voice ? undefined : voice.identifier,
-        pitch: 1.0,
+        pitch: 1.25,
         rate: parseFloat(speed),
         // rate: parseFloat(speed),
+        onStart: () => {
+          setResponse(true);
+        },
         onDone: () => {
           setIsPlaying(false);
-          console.log("Done");
+          // console.log("Done");
         },
         language: "en-US",
       });
