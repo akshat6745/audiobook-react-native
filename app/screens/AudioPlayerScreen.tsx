@@ -5,6 +5,7 @@ import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Picker } from "@react-native-picker/picker";
 import * as Speech from "expo-speech";
+import VoiceMenu from "./VoiceMenu";
 
 type RootStackParamList = {
   AudioPlayer: {
@@ -47,6 +48,13 @@ const AudioPlayerScreen: React.FC<Props> = ({ route }) => {
       );
     });
   }, []);
+
+  const changeVoices = (selectedVoiceId: string) => {
+    const selectedVoice = optionVoices.find((v) => v.identifier === selectedVoiceId);
+    setVoice(selectedVoice ?? null);
+    setIsVoicePickerVisible(false);
+  };
+
 
   const togglePlayPause = () => {
     if (isPlaying) {
@@ -128,30 +136,14 @@ const AudioPlayerScreen: React.FC<Props> = ({ route }) => {
             Voice: {voice?.name ?? "Default"}
           </Text>
         </TouchableOpacity>
-        {isVoicePickerVisible && (
-          <Picker
-            selectedValue={voice?.identifier}
-            onValueChange={(itemValue) => {
-              const selectedVoice = optionVoices.find(
-                (v) => v.identifier === itemValue
-              );
-              setVoice(selectedVoice ?? null);
-              setIsVoicePickerVisible(false);
-            }}
-            style={styles.picker}
-          >
-            {optionVoices.map((voice) => {
-              console.log(voice);
-              return (
-                <Picker.Item
-                  key={voice.identifier}
-                  label={voice.name}
-                  value={voice.identifier}
-                />
-              );
-            })}
-          </Picker>
-        )}
+
+        <VoiceMenu
+          visible={isVoicePickerVisible}
+          onClose={() => setIsVoicePickerVisible(false)}
+          selectedVoice={voice?.identifier ?? ""}
+          onSelectVoice={changeVoices}
+          voices={optionVoices}
+        />
 
         {/* Speed Selection */}
         <TouchableOpacity
