@@ -4,9 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 
 type RootStackParamList = {
-  // ChapterContent: { filename: string; chapterNumber: number; title: string };
-  // AudioPlayer: { paragraph: string; filename: string; chapterNumber: number; paragraphIndex: number };
-  EpubDetail: { epub: {id: string, name: string} };
+  EpubDetail: { name: string };
 };
 
 interface Epub {
@@ -18,25 +16,39 @@ const HomeScreen: React.FC = () => {
   const [epubs, setEpubs] = useState<Epub[]>([]);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
+  const [epubsTitle, setEpubsTitle] = useState<string[]>([]);
+
+
+  const fetchPublicGoogleDoc = async () => {
+    try {
+      const docId = "1VRLgR_6cCJeXVh6N3IAiwrlxEmeDbc03CqqSZ_o57so"; // Replace with actual ID
+      const response = await fetch(`https://docs.google.com/document/d/${docId}/export?format=txt`);
+      const text = await response.text();
+  
+      const lines = text.split("\n").map(line => line.trim()).filter(line => line.length > 0);
+      setEpubsTitle(lines);
+      // console.log(lines);
+    } catch (error) {
+      console.error("Error fetching Google Doc:", error);
+    }
+  };
+  
   useEffect(() => {
-    fetch("http://localhost:8000/epubs")
-      .then((res) => res.json())
-      .then((data) => setEpubs(data))
-      .catch((error) => console.error("Error fetching EPUBs:", error));
+    fetchPublicGoogleDoc();
   }, []);
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={epubs}
-        keyExtractor={(item) => item.id}
+        data={epubsTitle}
+        keyExtractor={(item) => item}
         numColumns={2}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.tile}
-            onPress={() => navigation.navigate("EpubDetail", { epub: item })}
+            onPress={() => navigation.navigate("EpubDetail", { name: item })}
           >
-            <Text style={styles.text}>{item.name}</Text>
+            <Text style={styles.text}>{item}</Text>
           </TouchableOpacity>
         )}
       />
