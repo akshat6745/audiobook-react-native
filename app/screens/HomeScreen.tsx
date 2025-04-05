@@ -1,10 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type RootStackParamList = {
   EpubDetail: { name: string };
+  Home: undefined;
+};
+
+const DocIdScreen: React.FC = () => {
+  const [docId, setDocId] = useState("");
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+  const handleSave = async () => {
+    try {
+      await AsyncStorage.setItem("googleDocId", docId);
+      navigation.navigate("Home");
+    } catch (error) {
+      console.error("Failed to save Doc ID:", error);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>Enter Google Doc ID:</Text>
+      <TextInput
+        style={styles.input}
+        value={docId}
+        onChangeText={setDocId}
+        placeholder="Google Doc ID"
+      />
+      <Button title="Submit" onPress={handleSave} />
+    </View>
+  );
 };
 
 interface Epub {
@@ -13,26 +42,26 @@ interface Epub {
 }
 
 const HomeScreen: React.FC = () => {
-  const [epubs, setEpubs] = useState<Epub[]>([]);
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-
   const [epubsTitle, setEpubsTitle] = useState<string[]>([]);
-
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const fetchPublicGoogleDoc = async () => {
     try {
-      const docId = "1VRLgR_6cCJeXVh6N3IAiwrlxEmeDbc03CqqSZ_o57so"; // Replace with actual ID
-      const response = await fetch(`https://docs.google.com/document/d/${docId}/export?format=txt`);
+      const storedDocId = await AsyncStorage.getItem("googleDocId");
+      if (!storedDocId) {
+        console.error("No Doc ID found in storage");
+        return;
+      }
+      const response = await fetch(`https://docs.google.com/document/d/${storedDocId}/export?format=txt`);
       const text = await response.text();
-  
+
       const lines = text.split("\n").map(line => line.trim()).filter(line => line.length > 0);
       setEpubsTitle(lines);
-      // console.log(lines);
     } catch (error) {
       console.error("Error fetching Google Doc:", error);
     }
   };
-  
+
   useEffect(() => {
     fetchPublicGoogleDoc();
   }, []);
@@ -57,9 +86,10 @@ const HomeScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10, backgroundColor: "#f8f8f8" },
+  container: { flex: 1, padding: 10, backgroundColor: "#f8f8f8", justifyContent: "center" },
   tile: { flex: 1, margin: 5, padding: 10, backgroundColor: "#ddd", borderRadius: 10 },
-  text: { textAlign: "center", fontSize: 14, fontWeight: "bold" },
+  text: { textAlign: "center", fontSize: 14, fontWeight: "bold", marginBottom: 10 },
+  input: { borderColor: "#ccc", borderWidth: 1, borderRadius: 5, padding: 10, marginBottom: 10 }
 });
 
 export default HomeScreen;

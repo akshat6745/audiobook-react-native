@@ -22,6 +22,7 @@ type RootStackParamList = {
     filename: string;
     chapterNumber: number;
     paragraphIndex: number;
+    contentArray: string[];
   };
 };
 
@@ -56,7 +57,9 @@ const ChapterContentScreen: React.FC<Props> = ({ route, navigation }) => {
             p.textContent?.trim()
           );
           setContent(
-            contentArray.filter((item): item is string => item !== undefined && item !== '')
+            contentArray.filter(
+              (item): item is string => item !== undefined && item !== ""
+            )
           );
         }
       })
@@ -71,20 +74,47 @@ const ChapterContentScreen: React.FC<Props> = ({ route, navigation }) => {
       <FlatList
         data={content}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item, index }) => (
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate("AudioPlayer", {
-                paragraph: item,
-                filename: filename,
-                chapterNumber: chapterNumber,
-                paragraphIndex: index,
-              })
-            }
-          >
-            <Text style={styles.paragraph}>{item}</Text>
-          </TouchableOpacity>
-        )}
+        renderItem={({ item, index }) => {
+          // const setNextChapter = () => {
+          //   navigation.navigate("ChapterContent", {
+          //     filename,
+          //     chapterNumber: chapterNumber + 1,
+          //     title: title,
+          //     link,
+          //   });
+          // }
+          // const setNextParagraph = () => {
+          //   navigation.navigate("AudioPlayer", {
+          //     paragraph: item,
+          //     filename: filename,
+          //     chapterNumber: chapterNumber,
+          //     paragraphIndex: index,
+          //   });
+          // };
+          // const setPreviousParagraph = () => {
+          //   navigation.navigate("AudioPlayer", {
+          //     paragraph: item,
+          //     filename: filename,
+          //     chapterNumber: chapterNumber,
+          //     paragraphIndex: index,
+          //   });
+          // };
+          return (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("AudioPlayer", {
+                  paragraph: item,
+                  filename: filename,
+                  chapterNumber: chapterNumber,
+                  paragraphIndex: index,
+                  contentArray: content,
+                })
+              }
+            >
+              <Text style={styles.paragraph}>{item}</Text>
+            </TouchableOpacity>
+          );
+        }}
       />
     </View>
   );

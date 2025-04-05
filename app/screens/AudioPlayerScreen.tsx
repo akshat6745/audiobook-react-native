@@ -14,6 +14,11 @@ type RootStackParamList = {
     filename: string;
     chapterNumber: number;
     paragraphIndex: number;
+    contentArray: string[];
+    setNextChapter?: () => void;
+    setPreviousChapter?: () => void;
+    setNextParagraph?: () => void;
+    setPreviousParagraph?: () => void;
   };
 };
 
@@ -36,13 +41,15 @@ const defaultVoice = {
 };
 
 const AudioPlayerScreen: React.FC<Props> = ({ route }) => {
-  const { paragraph } = route.params;
+  const { filename, contentArray, paragraphIndex} = route.params;
   const [isPlaying, setIsPlaying] = useState(false);
   const [voice, setVoice] = useState<Speech.Voice>(defaultVoice);
   const [speed, setSpeed] = useState("1.0");
   const [isVoicePickerVisible, setIsVoicePickerVisible] = useState(false);
   const [isSpeedPickerVisible, setIsSpeedPickerVisible] = useState(false);
   const [optionVoices, setOptionVoices] = useState<Speech.Voice[]>([]);
+
+  const [paragraph, setParagraph] = useState(contentArray[paragraphIndex]);
 
   const [gotResponse, setResponse] = useState(false);
 
@@ -57,6 +64,11 @@ const AudioPlayerScreen: React.FC<Props> = ({ route }) => {
     //   );
     // });
     // GoogleTTS.speak(paragraph);
+    return () => {
+      // Cleanup function if needed
+      // GoogleTTS.stop();
+      Speech.stop();
+    }
   }, []);
 
   const changeVoices = (selectedVoiceId: string) => {
@@ -71,10 +83,12 @@ const AudioPlayerScreen: React.FC<Props> = ({ route }) => {
     if (isPlaying) {
       Speech.pause();
       // GoogleTTS.pause();
-    } else if(gotResponse) {
+    } 
+    else if(gotResponse) {
       Speech.resume();
       // GoogleTTS.resume();
-    } else {
+    } 
+    else {
       // GoogleTTS.speak(paragraph, voice.identifier, setResponse, parseFloat(speed));
       Speech.speak(paragraph, {
         voice: !voice ? undefined : voice.identifier,
@@ -95,6 +109,24 @@ const AudioPlayerScreen: React.FC<Props> = ({ route }) => {
     setIsPlaying((prev) => !prev);
   };
 
+  const nextParagraph = () => {
+    if (paragraphIndex + 1 < contentArray.length) {
+      setParagraph(contentArray[paragraphIndex + 1]);
+      // setParagraphIndex(paragraphIndex + 1);
+    } else {
+      // Handle end of content
+    }
+  }
+
+  const previousParagraph = () => {
+    if (paragraphIndex > 0) {
+      setParagraph(contentArray[paragraphIndex - 1]);
+      // setParagraphIndex(paragraphIndex - 1);
+    } else {
+      // Handle start of content
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.paragraph}>{paragraph}</Text>
@@ -105,7 +137,7 @@ const AudioPlayerScreen: React.FC<Props> = ({ route }) => {
             <Ionicons name="play-skip-back-outline" size={32} color="black" />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity onPress={previousParagraph}>
             <Ionicons
               name="chevron-back-circle-outline"
               size={40}
@@ -126,7 +158,7 @@ const AudioPlayerScreen: React.FC<Props> = ({ route }) => {
         </TouchableOpacity>
 
         <View style={styles.sideButtons}>
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity onPress={nextParagraph}>
             <Ionicons
               name="chevron-forward-circle-outline"
               size={40}
