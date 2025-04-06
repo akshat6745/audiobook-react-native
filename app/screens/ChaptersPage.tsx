@@ -10,6 +10,7 @@ import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import { parseHTML } from "linkedom";
+import axios from "axios";
 
 type RootStackParamList = {
   Home: undefined;
@@ -39,31 +40,64 @@ const ChaptersPage: React.FC<Props> = ({ route }) => {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const navigation = useNavigation();
 
-  // useEffect(() => {
-  //   fetch(`http://localhost:8000/epub/${name}/chapters`)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setChapters(data);
-  //     })
-  //     .catch((error) => console.error("Error fetching EPUBs:", error));
-  // }, []);
+  const checkInternetConnection = async () => {
+    try {
+      const response = await fetch("https://www.google.com", {
+        method: "GET",
+      });
+
+      if (response.status === 200) {
+        console.log("Internet is working");
+        return true;
+      } else {
+        console.log("Internet might not be working properly");
+        return false;
+      }
+    } catch (error) {
+      console.log("No Internet Connection", error);
+      return false;
+    }
+  };
 
   useEffect(() => {
-    fetch(`https://novelnext.dramanovels.io/ajax/chapter-archive?novelId=${name}`)
-      .then((res) => res.text()) // Get HTML as text
+    // fetch(())
+    // checkInternetConnection();
+    axios
+      .get("https://novelnext.dramanovels.io/ajax/chapter-archive", {
+        params: {
+          novelId: "the-villain-wants-to-live",
+        },
+        headers: {
+          accept: "*/*",
+          "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
+          "cache-control": "no-cache",
+          pragma: "no-cache",
+          priority: "u=1, i",
+          referer:
+            "https://novelnext.dramanovels.io/nw/the-villain-wants-to-live",
+          "sec-fetch-dest": "empty",
+          "sec-fetch-mode": "cors",
+          "user-agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+          "x-requested-with": "XMLHttpRequest",
+        },
+      })
+      .then((res) => res.data) // Get response data
       .then((html) => {
         const { document } = parseHTML(html); // Parse HTML using linkedom
         const chaptersData: Chapter[] = [];
-  
+
         document.querySelectorAll("li").forEach((element, index) => {
-          const title = element.querySelector(".nchr-text")?.textContent?.trim();
+          const title = element
+            .querySelector(".nchr-text")
+            ?.textContent?.trim();
           const link = element.querySelector("a")?.getAttribute("href");
-  
+
           if (title && link) {
             chaptersData.push({ chapter_id: `${index + 1}`, title, link });
           }
         });
-  
+
         setChapters(chaptersData);
         // console.log(chaptersData);
       })

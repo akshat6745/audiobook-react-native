@@ -1,9 +1,9 @@
 import axios from "axios";
 import { Audio } from "expo-av";
 
-const API_KEY = "AIzaSyBBf8np3K23UIiNqDrYi_rh1Pwz71yAmQA"; // Replace with your key
 
 let soundObject = new Audio.Sound();
+const API_KEY = ""
 
 const GoogleTTS = {
   async speak(text: string, voice: string, setResponse: (p: boolean) => void, rate: number) {

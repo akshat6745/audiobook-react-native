@@ -10,19 +10,19 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.my-epub-app"
+      "bundleIdentifier": "com.anonymous.my-epub-app",
+       "jsEngine": "jsc"
     },
+    "jsEngine": "hermes",
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.anonymous.myepubapp"
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "output": "static"
     },
     "plugins": [
       "expo-router",

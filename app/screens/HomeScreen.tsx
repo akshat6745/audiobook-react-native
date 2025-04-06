@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Button } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+  Button,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -43,19 +51,26 @@ interface Epub {
 
 const HomeScreen: React.FC = () => {
   const [epubsTitle, setEpubsTitle] = useState<string[]>([]);
+  const [docId, setDocId] = useState<string | null>(null);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const fetchPublicGoogleDoc = async () => {
     try {
       const storedDocId = await AsyncStorage.getItem("googleDocId");
       if (!storedDocId) {
-        console.error("No Doc ID found in storage");
+        setDocId(null);
         return;
       }
-      const response = await fetch(`https://docs.google.com/document/d/${storedDocId}/export?format=txt`);
+      setDocId(storedDocId);
+      const response = await fetch(
+        `https://docs.google.com/document/d/${storedDocId}/export?format=txt`
+      );
       const text = await response.text();
 
-      const lines = text.split("\n").map(line => line.trim()).filter(line => line.length > 0);
+      const lines = text
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
       setEpubsTitle(lines);
     } catch (error) {
       console.error("Error fetching Google Doc:", error);
@@ -65,6 +80,10 @@ const HomeScreen: React.FC = () => {
   useEffect(() => {
     fetchPublicGoogleDoc();
   }, []);
+
+  if (!docId) {
+    return <DocIdScreen />;
+  }
 
   return (
     <View style={styles.container}>
@@ -86,10 +105,32 @@ const HomeScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10, backgroundColor: "#f8f8f8", justifyContent: "center" },
-  tile: { flex: 1, margin: 5, padding: 10, backgroundColor: "#ddd", borderRadius: 10 },
-  text: { textAlign: "center", fontSize: 14, fontWeight: "bold", marginBottom: 10 },
-  input: { borderColor: "#ccc", borderWidth: 1, borderRadius: 5, padding: 10, marginBottom: 10 }
+  container: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: "#f8f8f8",
+    justifyContent: "center",
+  },
+  tile: {
+    flex: 1,
+    margin: 5,
+    padding: 10,
+    backgroundColor: "#ddd",
+    borderRadius: 10,
+  },
+  text: {
+    textAlign: "center",
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  input: {
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
 });
 
 export default HomeScreen;
